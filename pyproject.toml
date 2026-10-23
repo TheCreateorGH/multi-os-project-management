@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multi-os-project-management"
+version = "0.1.0"
+description = "Cross-platform project discovery and management TUI"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "textual>=0.47",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "build>=1"]
+binary = ["pyinstaller>=6"]
+
+[project.scripts]
+project-manager = "project_manager.cli:main"
+pm = "project_manager.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["project_manager*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
