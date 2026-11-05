@@ -4,7 +4,7 @@ import pytest
 
 from project_manager.models import ProjectMarkerError, load_project, write_project_marker
 from project_manager.scanner import discover_projects
-from project_manager.versioning import recommend_level
+from project_manager.versioning import bump_version, recommend_level
 
 
 def test_discover_collection_and_subproject(tmp_path: Path) -> None:
@@ -92,3 +92,21 @@ def test_change_size_and_commit_intent_recommend_levels(tmp_path: Path) -> None:
     assert recommend_level(1, project, commits=("feat: add API",))[0] == "minor"
     assert recommend_level(1, project, commits=("feat!: remove API",))[0] == "major"
     assert recommend_level(1, project, commits=("old feat: unrelated",))[0] == "patch"
+
+
+def test_bump_version_preserves_release_segment(tmp_path: Path) -> None:
+    write_project_marker(tmp_path, name="App", version="9.3.4.5")
+
+    assert bump_version(tmp_path, "patch") == "9.3.4.6"
+    assert load_project(tmp_path).version == "9.3.4.6"
+    assert bump_version(tmp_path, "minor") == "9.3.5.0"
+    assert load_project(tmp_path).version == "9.3.5.0"
+    assert bump_version(tmp_path, "major") == "9.4.0.0"
+    assert load_project(tmp_path).version == "9.4.0.0"
+
+
+def test_bump_version_requires_release_major_minor_bugfix(tmp_path: Path) -> None:
+    write_project_marker(tmp_path, name="App", version="1.2.3")
+
+    with pytest.raises(ValueError, match="expected release.major.minor.bug-fix"):
+        bump_version(tmp_path, "patch")

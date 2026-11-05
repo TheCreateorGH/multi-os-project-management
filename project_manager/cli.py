@@ -45,7 +45,11 @@ def build_parser() -> argparse.ArgumentParser:
     init.add_argument("path", type=Path, help="Project folder where the marker is written.")
     init.add_argument("--name", required=True, help="Human-readable project name.")
     init.add_argument("--type", default="unknown", dest="project_type", help="Project type label.")
-    init.add_argument("--version", default="0.1.0", help="Initial semantic version.")
+    init.add_argument(
+        "--version",
+        default="0.1.0.0",
+        help='Initial version in "release.major.minor.bug-fix" format.',
+    )
     init.add_argument(
         "--kind",
         choices=("project", "subproject"),

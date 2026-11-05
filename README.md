@@ -9,7 +9,7 @@ Folders become projects by containing a `.project.toml` marker:
 name = "Website"
 kind = "project"
 type = "application"
-version = "0.1.0"
+version = "0.1.0.0"
 description = "The public website"
 status = "active"
 tags = ["web", "production"]
@@ -68,9 +68,10 @@ usable with an explicit path.
 Git commands are intentionally project-scoped: a `.project.toml` must be found
 in the current folder or one of its parents. `pm git commit` analyzes staged
 changes (or the working-tree diff), counts added and deleted lines, and bumps
-the marker version:
+the marker version in `release.major.minor.bug-fix` format (the `release`
+segment is never changed by the script):
 
-* up to `minor_change_lines`: patch
+* up to `minor_change_lines`: bug-fix
 * above that up to `major_change_lines`: minor
 * at or above `major_change_lines`: major, but only after explicit approval
 

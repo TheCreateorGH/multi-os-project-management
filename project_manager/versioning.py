@@ -81,20 +81,22 @@ def recommend_level(
 
 def bump_version(path: Path, level: str) -> str:
     project = load_project(path)
-    current = project.version or "0.1.0"
-    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", current)
+    current = project.version or "0.1.0.0"
+    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)\.(\d+)", current)
     if not match:
-        raise ValueError(f"Unsupported semantic version: {current}")
-    major, minor, patch = map(int, match.groups())
+        raise ValueError(
+            f"Unsupported semantic version: {current} (expected release.major.minor.bug-fix)"
+        )
+    release, major, minor, bug_fix = map(int, match.groups())
     if level == "major":
-        major, minor, patch = major + 1, 0, 0
+        major, minor, bug_fix = major + 1, 0, 0
     elif level == "minor":
-        minor, patch = minor + 1, 0
+        minor, bug_fix = minor + 1, 0
     elif level == "patch":
-        patch += 1
+        bug_fix += 1
     else:
         raise ValueError(f"Unknown version level: {level}")
-    version = f"{major}.{minor}.{patch}"
+    version = f"{release}.{major}.{minor}.{bug_fix}"
     marker = path / ".project.toml"
     text = marker.read_text(encoding="utf-8")
     updated, count = re.subn(

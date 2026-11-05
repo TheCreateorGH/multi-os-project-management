@@ -172,7 +172,7 @@ def write_project_marker(
     name: str,
     kind: str = "project",
     project_type: str = "unknown",
-    version: str = "0.1.0",
+    version: str = "0.1.0.0",
     parent: str | None = None,
     description: str | None = None,
     status: str = "active",
