@@ -26,65 +26,181 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    scan = subparsers.add_parser("scan", help="discover projects below a folder")
-    scan.add_argument("path", nargs="?", type=Path, default=Path.cwd())
+    scan = subparsers.add_parser(
+        "scan",
+        help="discover projects below a folder",
+        description="Discover project markers recursively below a collection folder.",
+    )
+    scan.add_argument(
+        "path",
+        nargs="?",
+        type=Path,
+        default=Path.cwd(),
+        help="Folder to scan (defaults to current directory).",
+    )
 
-    init = subparsers.add_parser("init", help="create a project marker")
-    init.add_argument("path", type=Path)
-    init.add_argument("--name", required=True)
-    init.add_argument("--type", default="unknown", dest="project_type")
-    init.add_argument("--version", default="0.1.0")
-    init.add_argument("--kind", choices=("project", "subproject"), default="project")
-    init.add_argument("--parent")
-    init.add_argument("--description", default="")
-    init.add_argument("--status", default="active")
-    init.add_argument("--tags", default="")
-    init.add_argument("--license", dest="license_name")
-    init.add_argument("--repository")
-    init.add_argument("--owner")
-    init.add_argument("--language")
-    init.add_argument("--framework")
-    init.add_argument("--release-channel", default="stable")
-    init.add_argument("--dependency", action="append", default=[])
+    init = subparsers.add_parser(
+        "init", help="create a project marker", description="Create a .project.toml marker."
+    )
+    init.add_argument("path", type=Path, help="Project folder where the marker is written.")
+    init.add_argument("--name", required=True, help="Human-readable project name.")
+    init.add_argument("--type", default="unknown", dest="project_type", help="Project type label.")
+    init.add_argument("--version", default="0.1.0", help="Initial semantic version.")
+    init.add_argument(
+        "--kind",
+        choices=("project", "subproject"),
+        default="project",
+        help="Marker kind.",
+    )
+    init.add_argument("--parent", help="Parent project name (required for subprojects).")
+    init.add_argument("--description", default="", help="Project description.")
+    init.add_argument("--status", default="active", help="Lifecycle status.")
+    init.add_argument("--tags", default="", help="Comma-separated tag list.")
+    init.add_argument("--license", dest="license_name", help="License identifier.")
+    init.add_argument("--repository", help="Repository URL or identifier.")
+    init.add_argument("--owner", help="Project owner.")
+    init.add_argument("--language", help="Primary implementation language.")
+    init.add_argument("--framework", help="Primary framework or platform.")
+    init.add_argument("--release-channel", default="stable", help="Release channel name.")
+    init.add_argument(
+        "--dependency", action="append", default=[], help="Dependency project name (repeatable)."
+    )
 
-    tui = subparsers.add_parser("tui", help="open the Textual interface")
-    tui.add_argument("path", nargs="?", type=Path, default=Path.cwd())
+    tui = subparsers.add_parser(
+        "tui",
+        help="open the Textual interface",
+        description="Open the interactive Textual interface for discovered projects.",
+    )
+    tui.add_argument(
+        "path",
+        nargs="?",
+        type=Path,
+        default=Path.cwd(),
+        help="Collection folder to scan (defaults to current directory).",
+    )
     workspace = subparsers.add_parser(
-        "workspace", help="manage centrally registered collection folders"
+        "workspace",
+        help="manage centrally registered collection folders",
+        description="Manage configured workspace folders and project inventory tools.",
     )
     workspace_subparsers = workspace.add_subparsers(dest="workspace_command", required=True)
-    workspace_subparsers.add_parser("list", help="list registered folders")
-    add = workspace_subparsers.add_parser("add", help="register a collection folder")
-    add.add_argument("path", type=Path)
-    remove = workspace_subparsers.add_parser("remove", help="unregister a collection folder")
-    remove.add_argument("path", type=Path)
-    workspace_subparsers.add_parser("scan", help="scan all registered folders")
-    search = workspace_subparsers.add_parser("search", help="search registered projects")
-    search.add_argument("query")
-    export = workspace_subparsers.add_parser("export", help="export registered projects")
-    export.add_argument("path", type=Path)
-    graph = workspace_subparsers.add_parser("graph", help="show project dependencies")
-    graph.add_argument("--format", choices=("text", "dot"), default="text")
+    workspace_subparsers.add_parser(
+        "list", help="list registered folders", description="List all registered workspace folders."
+    )
+    add = workspace_subparsers.add_parser(
+        "add",
+        help="register a collection folder",
+        description="Register a folder in the central workspace configuration.",
+    )
+    add.add_argument("path", type=Path, help="Folder path to register.")
+    remove = workspace_subparsers.add_parser(
+        "remove",
+        help="unregister a collection folder",
+        description="Remove a folder from the central workspace configuration.",
+    )
+    remove.add_argument("path", type=Path, help="Folder path to unregister.")
+    workspace_subparsers.add_parser(
+        "scan",
+        help="scan all registered folders",
+        description="Scan every registered workspace folder for projects.",
+    )
+    search = workspace_subparsers.add_parser(
+        "search",
+        help="search registered projects",
+        description="Search project names and tags across registered workspace folders.",
+    )
+    search.add_argument("query", help="Case-insensitive text query.")
+    export = workspace_subparsers.add_parser(
+        "export",
+        help="export registered projects",
+        description="Export discovered workspace projects to JSON or CSV.",
+    )
+    export.add_argument("path", type=Path, help="Output file path (.json or .csv).")
+    graph = workspace_subparsers.add_parser(
+        "graph",
+        help="show project dependencies",
+        description="Display dependency relationships for workspace projects.",
+    )
+    graph.add_argument(
+        "--format",
+        choices=("text", "dot"),
+        default="text",
+        help="Output format for dependency graph.",
+    )
 
-    check = subparsers.add_parser("check", help="run project health checks")
-    check.add_argument("path", nargs="?", type=Path, default=Path.cwd())
-    doctor_parser = subparsers.add_parser("doctor", help="show project diagnostics")
-    doctor_parser.add_argument("path", nargs="?", type=Path, default=Path.cwd())
-    version = subparsers.add_parser("version", help="preview or apply a version bump")
+    check = subparsers.add_parser(
+        "check",
+        help="run project health checks",
+        description="Run project health checks for the nearest marked project.",
+    )
+    check.add_argument(
+        "path",
+        nargs="?",
+        type=Path,
+        default=Path.cwd(),
+        help="Path inside a marked project (defaults to current directory).",
+    )
+    doctor_parser = subparsers.add_parser(
+        "doctor", help="show project diagnostics", description="Show actionable project diagnostics."
+    )
+    doctor_parser.add_argument(
+        "path",
+        nargs="?",
+        type=Path,
+        default=Path.cwd(),
+        help="Path inside a marked project (defaults to current directory).",
+    )
+    version = subparsers.add_parser(
+        "version",
+        help="preview or apply a version bump",
+        description="Preview or apply semantic version changes based on project rules.",
+    )
     version_sub = version.add_subparsers(dest="version_command", required=True)
-    version_sub.add_parser("preview")
-    version_sub.choices["preview"].add_argument("--message", action="append", default=[])
-    version_bump = version_sub.add_parser("bump")
-    version_bump.add_argument("level", choices=("patch", "minor", "major"))
-    open_parser = subparsers.add_parser("open", help="open a registered project")
-    open_parser.add_argument("name")
-    history = subparsers.add_parser("history", help="show project metadata history")
-    history.add_argument("path", nargs="?", type=Path, default=Path.cwd())
+    version_preview = version_sub.add_parser(
+        "preview",
+        help="preview the recommended version bump",
+        description="Show recommended version bump and reasons without editing files.",
+    )
+    version_preview.add_argument(
+        "--message",
+        action="append",
+        default=[],
+        help="Commit message hint used for bump intent (repeatable).",
+    )
+    version_bump = version_sub.add_parser(
+        "bump",
+        help="apply an explicit version bump",
+        description="Apply a semantic version bump to the project marker.",
+    )
+    version_bump.add_argument(
+        "level", choices=("patch", "minor", "major"), help="Bump level to apply."
+    )
+    open_parser = subparsers.add_parser(
+        "open", help="open a registered project", description="Open a project by exact registered name."
+    )
+    open_parser.add_argument("name", help="Exact project name to open.")
+    history = subparsers.add_parser(
+        "history",
+        help="show project metadata history",
+        description="Show Git history for the .project.toml marker in a project.",
+    )
+    history.add_argument(
+        "path",
+        nargs="?",
+        type=Path,
+        default=Path.cwd(),
+        help="Path inside a marked project (defaults to current directory).",
+    )
 
     git = subparsers.add_parser(
-        "git", help="run project-aware Git commands, passing unknown commands to Git"
+        "git",
+        help="run project-aware Git commands, passing unknown commands to Git",
+        description=(
+            "Run project-aware Git helpers (install-hooks, uninstall-hooks, changelog, "
+            "release) or pass commands through to Git."
+        ),
     )
-    git.add_argument("git_args", nargs=argparse.REMAINDER)
+    git.add_argument("git_args", nargs=argparse.REMAINDER, help="Git subcommand and arguments.")
     return parser
 
 
